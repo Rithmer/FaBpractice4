@@ -1,0 +1,12 @@
+{
+    "name": "practice-3",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.19.2",
+      "nanoid": "^5.0.7",
+      "cors": "^2.8.5"
+    }
+  }
