@@ -68,20 +68,6 @@ app.use(
   })
 );
 
-app.use((req, res, next) => {
-  res.on("finish", () => {
-    console.log(
-      `[${new Date().toISOString()}] [${req.method}] ${res.statusCode} ${
-        req.path
-      }`
-    );
-    if (["POST", "PUT", "PATCH"].includes(req.method)) {
-      console.log("Body:", req.body);
-    }
-  });
-  next();
-});
-
 function findProductOr404(id, res) {
   const product = products.find((p) => p.id === id);
   if (!product) {
@@ -93,15 +79,21 @@ function findProductOr404(id, res) {
 
 const swaggerOptions = {
   definition: {
-    openapi: "3.0.0",
+    openapi: "3.0.3",
     info: {
       title: "ТехМаркет API",
       version: "1.0.0",
       description:
-        "REST API интернет-магазина техники (практическое занятие №5)",
+        "REST API интернет-магазина техники с полной документацией CRUD-операций",
     },
     servers: [
       { url: `http://localhost:${port}`, description: "Локальный сервер" },
+    ],
+    tags: [
+      {
+        name: "Products",
+        description: "Операции с товарами",
+      },
     ],
     components: {
       schemas: {
@@ -109,13 +101,45 @@ const swaggerOptions = {
           type: "object",
           required: ["name", "category", "price"],
           properties: {
-            id: { type: "string" },
+            id: { type: "string", example: "abc123", readOnly: true },
+            name: { type: "string", example: "Ноутбук Apple MacBook Pro 14" },
+            category: { type: "string", example: "Ноутбуки" },
+            description: {
+              type: "string",
+              example: "Мощный ноутбук для профессионалов",
+            },
+            price: { type: "number", example: 199990 },
+            stock: { type: "integer", example: 10 },
+            rating: { type: "number", example: 4.9 },
+          },
+        },
+        ProductCreate: {
+          type: "object",
+          required: ["name", "category", "price"],
+          properties: {
             name: { type: "string" },
             category: { type: "string" },
             description: { type: "string" },
             price: { type: "number" },
             stock: { type: "integer" },
             rating: { type: "number" },
+          },
+        },
+        ProductUpdate: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            category: { type: "string" },
+            description: { type: "string" },
+            price: { type: "number" },
+            stock: { type: "integer" },
+            rating: { type: "number" },
+          },
+        },
+        Error: {
+          type: "object",
+          properties: {
+            error: { type: "string", example: "Product not found" },
           },
         },
       },
@@ -136,6 +160,12 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *     responses:
  *       200:
  *         description: Список товаров
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
  */
 app.get("/api/products", (req, res) => {
   res.json(products);
@@ -145,8 +175,28 @@ app.get("/api/products", (req, res) => {
  * @swagger
  * /api/products/{id}:
  *   get:
- *     summary: Получить один товар по ID
+ *     summary: Получить товар по ID
  *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID товара (6-символьный nanoid)
+ *     responses:
+ *       200:
+ *         description: Найденный товар
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Товар не найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 app.get("/api/products/:id", (req, res) => {
   const product = findProductOr404(req.params.id, res);
@@ -157,8 +207,23 @@ app.get("/api/products/:id", (req, res) => {
  * @swagger
  * /api/products:
  *   post:
- *     summary: Добавить новый товар
+ *     summary: Создать новый товар
  *     tags: [Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductCreate'
+ *     responses:
+ *       201:
+ *         description: Товар создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Некорректные данные
  */
 app.post("/api/products", (req, res) => {
   const { name, category, description, price, stock, rating } = req.body;
@@ -167,6 +232,7 @@ app.post("/api/products", (req, res) => {
       .status(400)
       .json({ error: "name, category and price are required" });
   }
+
   const newProduct = {
     id: nanoid(6),
     name: name.trim(),
@@ -176,6 +242,7 @@ app.post("/api/products", (req, res) => {
     stock: Number(stock) || 0,
     rating: Number(rating) || 0,
   };
+
   products.push(newProduct);
   res.status(201).json(newProduct);
 });
@@ -186,19 +253,33 @@ app.post("/api/products", (req, res) => {
  *   patch:
  *     summary: Частично обновить товар
  *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductUpdate'
+ *     responses:
+ *       200:
+ *         description: Товар обновлён
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Товар не найден
  */
 app.patch("/api/products/:id", (req, res) => {
   const product = findProductOr404(req.params.id, res);
   if (!product) return;
 
-  const { name, category, description, price, stock, rating } = req.body;
-  if (name !== undefined) product.name = name.trim();
-  if (category !== undefined) product.category = category.trim();
-  if (description !== undefined) product.description = description.trim();
-  if (price !== undefined) product.price = Number(price);
-  if (stock !== undefined) product.stock = Number(stock);
-  if (rating !== undefined) product.rating = Number(rating);
-
+  Object.assign(product, req.body);
   res.json(product);
 });
 
@@ -208,21 +289,27 @@ app.patch("/api/products/:id", (req, res) => {
  *   delete:
  *     summary: Удалить товар
  *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Товар удалён
+ *       404:
+ *         description: Товар не найден
  */
 app.delete("/api/products/:id", (req, res) => {
   const exists = products.some((p) => p.id === req.params.id);
   if (!exists) return res.status(404).json({ error: "Product not found" });
+
   products = products.filter((p) => p.id !== req.params.id);
   res.status(204).send();
 });
 
-app.use((req, res) => res.status(404).json({ error: "Not found" }));
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: "Internal server error" });
-});
-
 app.listen(port, () => {
-  console.log(`Сервер запущен на http://localhost:${port}`);
-  console.log(`Документация Swagger → http://localhost:${port}/api-docs`);
+  console.log(`Сервер запущен: http://localhost:${port}`);
+  console.log(`Swagger: http://localhost:${port}/api-docs`);
 });
