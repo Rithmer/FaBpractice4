@@ -1,0 +1,588 @@
+$bg: #0a0e17;
+$panel: rgba(255, 255, 255, 0.05);
+$border: rgba(255, 255, 255, 0.15);
+$text: #e6e9f0;
+$text-muted: rgba(230, 233, 240, 0.6);
+$primary: rgba(56, 189, 248, 0.55);
+$primary-bg: rgba(56, 189, 248, 0.18);
+$danger: rgba(239, 68, 68, 0.45);
+$danger-bg: rgba(239, 68, 68, 0.12);
+
+@mixin card {
+  border-radius: 14px;
+  border: 1px solid $border;
+  background: $panel;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+@mixin button($bg: transparent, $border-color: rgba(255, 255, 255, 0.14)) {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid $border-color;
+  background: $bg;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $bg;
+  color: $text;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+
+  .header {
+    border-bottom: 1px solid $border;
+    background: $panel;
+
+    &__inner {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    &__right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+  }
+
+  .brand {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .userInfo {
+    opacity: 0.7;
+    font-size: 14px;
+  }
+
+  .roleChip {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid $primary;
+    color: rgba(56, 189, 248, 0.95);
+    background: rgba(56, 189, 248, 0.1);
+  }
+
+  .main {
+    flex: 1;
+    padding: 32px 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .searchInput {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid $border;
+    background: $panel;
+    color: inherit;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: $primary;
+    }
+
+    &::placeholder {
+      opacity: 0.5;
+    }
+  }
+
+  .catTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .catTab {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid $border;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 13px;
+    opacity: 0.75;
+    transition: all 0.15s;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    &--active {
+      background: $primary-bg;
+      border-color: $primary;
+      opacity: 1;
+    }
+  }
+
+  .stats {
+    margin-bottom: 16px;
+    font-size: 14px;
+    opacity: 0.7;
+  }
+
+  .permissionHint {
+    font-size: 13px;
+    opacity: 0.75;
+  }
+
+  .sectionTabs {
+    display: inline-flex;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 14px;
+    border: 1px solid $border;
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 20px;
+  }
+
+  .sectionTab {
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    &--active {
+      border-color: $primary;
+      background: $primary-bg;
+    }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .productCard {
+    @include card;
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &__body {
+      flex: 1;
+    }
+
+    &__footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+  }
+
+  .productCategory {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid $primary;
+    color: $primary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .productTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .productDesc {
+    font-size: 13px;
+    opacity: 0.6;
+    line-height: 1.4;
+  }
+
+  .productPrice {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .productActions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn {
+    @include button();
+
+    &--sm {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    &--primary {
+      @include button($primary-bg, $primary);
+    }
+
+    &--danger {
+      @include button($danger-bg, $danger);
+    }
+  }
+
+  .empty {
+    text-align: center;
+    padding: 40px;
+    opacity: 0.5;
+    font-size: 16px;
+    border-radius: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+  }
+
+  .footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    margin-top: auto;
+
+    &__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 13px;
+      opacity: 0.5;
+    }
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 100;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: 520px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #0f1526;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    &__header {
+      padding: 14px 16px;
+      border-bottom: 1px solid $border;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    &__title {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    &__footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+  }
+
+  .modal--details {
+    max-width: 620px;
+  }
+
+  .detailsContent {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .detailRow {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    align-items: start;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+  }
+
+  .detailLabel {
+    font-size: 12px;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .detailValue {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .iconBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .form {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  .input {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+
+    option {
+      background: #0f1526;
+    }
+  }
+
+  .textarea {
+    resize: vertical;
+  }
+
+  .usersSection {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .usersHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .usersTitle {
+    margin: 0;
+  }
+
+  .usersError {
+    border: 1px solid $danger;
+    background: rgba(239, 68, 68, 0.14);
+    color: rgba(255, 164, 164, 0.95);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .usersTableWrap {
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    background: $panel;
+  }
+
+  .usersTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    thead th {
+      color: $text-muted;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.4px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  .tableInput {
+    width: 100%;
+    min-width: 110px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    color: inherit;
+    font-size: 13px;
+
+    option {
+      background: #0f1526;
+    }
+  }
+
+  .tableActions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .roleBadge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 3px 10px;
+    font-size: 12px;
+    text-transform: lowercase;
+
+    &--user {
+      border-color: rgba(148, 163, 184, 0.55);
+      color: rgba(203, 213, 225, 0.95);
+      background: rgba(148, 163, 184, 0.12);
+    }
+
+    &--seller {
+      border-color: rgba(34, 197, 94, 0.55);
+      color: rgba(134, 239, 172, 0.95);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    &--admin {
+      border-color: rgba(249, 115, 22, 0.55);
+      color: rgba(253, 186, 116, 0.95);
+      background: rgba(249, 115, 22, 0.12);
+    }
+  }
+
+  .status {
+    font-size: 12px;
+    color: rgba(134, 239, 172, 0.95);
+
+    &--blocked {
+      color: rgba(252, 165, 165, 0.95);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .header {
+      &__inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      &__right {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .detailRow {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .sectionTabs {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .sectionTab {
+      flex: 1;
+      text-align: center;
+    }
+  }
+}
