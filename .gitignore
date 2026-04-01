@@ -21,3 +21,5 @@
 **/.vscode/
 **/.idea/
 **/vite.svg
+**/localhost+2.pem
+**/localhost+2-key.pem
