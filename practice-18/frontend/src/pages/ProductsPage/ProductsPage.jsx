@@ -7,6 +7,8 @@ import ProductDetailsModal from "../../components/ProductDetailsModal";
 import UsersManagement from "../../components/UsersManagement";
 import { api } from "../../api";
 
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://localhost:3000";
+
 export default function ProductsPage({ user, onLogout }) {
   if (!user) {
     return null;
@@ -72,7 +74,7 @@ export default function ProductsPage({ user, onLogout }) {
   }, [userId]);
 
   useEffect(() => {
-    const socket = io("http://localhost:3000");
+    const socket = io(SOCKET_URL);
     socketRef.current = socket;
 
     const emitVisibility = () => {

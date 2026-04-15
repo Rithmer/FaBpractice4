@@ -143,8 +143,24 @@
 
 - Node.js 18+ (рекомендуется актуальная LTS)
 - npm
+- mkcert
 
-### 2. Запуск backend
+### 2. Установка mkcert и генерация сертификатов
+
+```bash
+# macOS (Homebrew)
+brew install mkcert
+
+# установить локальный CA
+mkcert -install
+
+# из папки practice-18
+mkcert localhost 127.0.0.1 ::1
+```
+
+`mkcert` создаст пару `localhost*.pem`. Backend и frontend автоматически найдут сертификаты в `practice-18`, `practice-18/backend`, `practice-18/frontend` или `practice-18/certs`.
+
+### 3. Запуск backend
 
 ```bash
 cd backend
@@ -152,10 +168,10 @@ npm install
 node server.js
 ```
 
-Backend будет доступен по адресу: `http://localhost:3000`  
-Swagger UI: `http://localhost:3000/api-docs`
+Backend будет доступен по адресу: `https://localhost:3000`  
+Swagger UI: `https://localhost:3000/api-docs`
 
-### 3. Запуск frontend
+### 4. Запуск frontend
 
 ```bash
 cd frontend
@@ -163,9 +179,9 @@ npm install
 npm run dev
 ```
 
-Frontend будет доступен по адресу: `http://localhost:3001`
+Frontend будет доступен по адресу: `https://localhost:3001`
 
-### 4. Сборка frontend
+### 5. Сборка frontend
 
 ```bash
 cd frontend
@@ -178,4 +194,4 @@ npm run build
 
 Документация API доступна после запуска backend по адресу:
 
-`http://localhost:3000/api-docs`
+`https://localhost:3000/api-docs`
