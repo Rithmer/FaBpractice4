@@ -1,5 +1,7 @@
 const express = require("express");
-const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
@@ -10,20 +12,89 @@ const socketIo = require("socket.io");
 const webpush = require("web-push");
 
 const app = express();
-const port = 3000;
-const server = http.createServer(app);
+const host = process.env.HOST || "localhost";
+const port = Number(process.env.PORT || 3000);
+const projectRoot = path.resolve(__dirname, "..");
+
+function resolveCertFiles(searchDirs) {
+  const variants = [
+    { cert: "localhost.pem", key: "localhost-key.pem" },
+    { cert: "localhost+2.pem", key: "localhost+2-key.pem" },
+  ];
+
+  for (const dir of searchDirs) {
+    for (const variant of variants) {
+      const certPath = path.join(dir, variant.cert);
+      const keyPath = path.join(dir, variant.key);
+
+      if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+        return { certPath, keyPath };
+      }
+    }
+  }
+
+  return null;
+}
+
+const envCertPath = process.env.SSL_CERT_PATH;
+const envKeyPath = process.env.SSL_KEY_PATH;
+
+let certFiles = null;
+if (envCertPath && envKeyPath) {
+  if (fs.existsSync(envCertPath) && fs.existsSync(envKeyPath)) {
+    certFiles = { certPath: envCertPath, keyPath: envKeyPath };
+  } else {
+    console.error("Пути SSL_CERT_PATH/SSL_KEY_PATH заданы, но файлы не найдены.");
+    process.exit(1);
+  }
+}
+
+if (!certFiles) {
+  certFiles = resolveCertFiles([
+    __dirname,
+    projectRoot,
+    path.join(projectRoot, "certs"),
+  ]);
+}
+
+if (!certFiles) {
+  console.error("Не найдены SSL сертификат и ключ.");
+  console.error(
+    "Ожидались файлы localhost.pem + localhost-key.pem или localhost+2.pem + localhost+2-key.pem."
+  );
+  console.error(
+    "Сгенерируйте сертификаты командой: mkcert localhost 127.0.0.1 ::1"
+  );
+  process.exit(1);
+}
+
+const server = https.createServer(
+  {
+    key: fs.readFileSync(certFiles.keyPath),
+    cert: fs.readFileSync(certFiles.certPath),
+  },
+  app
+);
+
+const frontendOrigins = [
+  "https://localhost:3001",
+  "https://127.0.0.1:3001",
+  "https://localhost:5173",
+  "https://127.0.0.1:5173",
+  "http://localhost:3001",
+  "http://127.0.0.1:3001",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
+
 const io = socketIo(server, {
-  cors: { origin: ["http://localhost:5173", "http://127.0.0.1:5173"] },
+  cors: { origin: frontendOrigins },
 });
 
 app.use(express.json());
 app.use(
   cors({
-    origin: [
-      "http://localhost:3001",
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-    ],
+    origin: frontendOrigins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -341,7 +412,7 @@ const swaggerOptions = {
       title: "ТехМаркет API",
       version: "1.0.0",
     },
-    servers: [{ url: `http://localhost:${port}` }],
+    servers: [{ url: `https://${host}:${port}` }],
     components: {
       securitySchemes: {
         bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" },
@@ -737,8 +808,8 @@ io.on("connection", (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Сервер запущен: http://localhost:${port}`);
-  console.log(`Swagger: http://localhost:${port}/api-docs`);
+  console.log(`Сервер запущен: https://${host}:${port}`);
+  console.log(`Swagger: https://${host}:${port}/api-docs`);
   console.log("Тестовые аккаунты:");
   console.log("admin@techmarket.local / admin12345");
   console.log("seller@techmarket.local / seller12345");
