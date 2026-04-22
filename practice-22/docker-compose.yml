@@ -1,0 +1,48 @@
+services:
+  backend1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: practice22-backend:latest
+    container_name: practice22-backend1
+    command: ["node", "backend.js", "--port", "3000", "--name", "backend-1", "--role", "primary"]
+
+  backend2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: practice22-backend:latest
+    container_name: practice22-backend2
+    command: ["node", "backend.js", "--port", "3000", "--name", "backend-2", "--role", "primary"]
+
+  backend3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: practice22-backend:latest
+    container_name: practice22-backend3
+    command: ["node", "backend.js", "--port", "3000", "--name", "backend-3", "--role", "backup"]
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: practice22-nginx
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.docker.conf:/etc/nginx/nginx.conf:ro
+
+  haproxy:
+    image: haproxy:3.0-alpine
+    container_name: practice22-haproxy
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./haproxy.docker.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
