@@ -1,25 +1,21 @@
-**/node_modules/
-**/build/
-**/dist/
-**/.next/
-**/out/
-**/.cache/
-**/.parcel-cache/
-**/.eslintcache
-**/*.log
-**/logs/
-**/.env
-**/.env.local
-**/.env.*.local
-!**/.env.example
-**/coverage/
-**/*.tsbuildinfo
-**/tmp/
-**/temp/
-**/.DS_Store
-**/Thumbs.db
-**/.vscode/
-**/.idea/
-**/vite.svg
-**/localhost+2.pem
-**/localhost+2-key.pem
+node_modules/
+coverage/
+dist/
+build/
+
+# Local environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+temp/
+
+# OS/editor files
+.DS_Store
+.vscode/
+.idea/
