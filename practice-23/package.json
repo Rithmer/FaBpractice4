@@ -1,0 +1,14 @@
+{
+  "name": "practice-23",
+  "version": "1.0.0",
+  "description": "Практика 23: контейнеризация приложения с Docker и Nginx",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "check": "node --check app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
