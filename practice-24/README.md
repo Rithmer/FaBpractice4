@@ -130,3 +130,27 @@ Full-stack приложение интернет-магазина с микро�
 * `POST /api/products`
 * `PUT /api/products/:id`
 * `DELETE /api/products/:id`
+
+---
+
+Да, это обязательно надо добавить — иначе у него реально не запустится. Вставь как отдельный блок перед запуском.
+
+Вот как лучше оформить в README (чётко и по делу 👇):
+
+---
+
+## Важно: генерация SSL-сертификатов
+
+Проект использует HTTPS (Nginx).
+Перед первым запуском необходимо создать локальные сертификаты.
+
+### Создание сертификатов
+
+```bash
+mkdir -p nginx/certs
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout nginx/certs/key.pem \
+  -out nginx/certs/cert.pem \
+  -subj "/CN=localhost"
+```
