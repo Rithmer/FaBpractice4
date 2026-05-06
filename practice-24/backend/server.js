@@ -1,4 +1,4 @@
-const app = require("./app");
+const { app, server } = require("./app");
 const { pool, initPostgres } = require("./db/postgres");
 const { connectMongo, initMongo } = require("./db/mongo");
 const { connectRedis } = require("./db/redis");
@@ -24,7 +24,7 @@ async function start() {
   await initPostgres();
   await initMongo();
 
-  app.listen(PORT, "0.0.0.0", () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`[${SERVER_ID}] Сервер запущен на порту ${PORT}`);
   });
 }

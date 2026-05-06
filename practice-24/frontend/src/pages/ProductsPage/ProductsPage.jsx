@@ -18,12 +18,57 @@ export default function ProductsPage({ user, onLogout }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsProduct, setDetailsProduct] = useState(null);
+  const [isPushEnabled, setIsPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [reminderProductTitle, setReminderProductTitle] = useState("");
+  const [realtimeEvents, setRealtimeEvents] = useState([]);
+  const [trackedReminders, setTrackedReminders] = useState([]);
+  const [browserReminder, setBrowserReminder] = useState(null);
 
   const isAdmin = user.role === "admin";
   const canCreateOrEditProduct =
     user.role === "seller" || user.role === "admin";
   const canDeleteProduct = user.role === "admin";
 
+  const enablePushNotifications = async () => {
+    setPushLoading(true);
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        setIsPushEnabled(true);
+      } else {
+        alert("Push-уведомления не разрешены браузером");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
+  const disablePushNotifications = () => {
+    setIsPushEnabled(false);
+  };
+
+  const handleCreateDeliveryReminder = (e) => {
+    e.preventDefault();
+    if (!reminderProductTitle.trim()) return;
+    const id = Date.now();
+    setTrackedReminders((prev) => [
+      ...prev,
+      { id, productTitle: reminderProductTitle.trim() },
+    ]);
+    setReminderProductTitle("");
+  };
+
+  const handleDismissTrackedReminder = (id) => {
+    setTrackedReminders((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const handleDismissBrowserReminder = () => {
+    setBrowserReminder(null);
+  };
+  
   useEffect(() => {
     loadProducts();
   }, []);
@@ -213,6 +258,89 @@ export default function ProductsPage({ user, onLogout }) {
                 Показано: <strong>{filteredProducts.length}</strong> из{" "}
                 <strong>{products.length}</strong> товаров
               </div>
+
+              <section className="reminderPanel">
+                <div className="reminderPanel__header">
+                  <h2>Уведомления о появлении товара</h2>
+                  <button
+                    type="button"
+                    className="btn btn--primary"
+                    onClick={
+                      isPushEnabled
+                        ? disablePushNotifications
+                        : enablePushNotifications
+                    }
+                    disabled={pushLoading}
+                  >
+                    {pushLoading
+                      ? "Подключение..."
+                      : isPushEnabled
+                        ? "Выключить push"
+                        : "Включить push"}
+                  </button>
+                </div>
+
+                <form
+                  className="reminderForm"
+                  onSubmit={handleCreateDeliveryReminder}
+                >
+                  <input
+                    className="input"
+                    value={reminderProductTitle}
+                    onChange={(e) => setReminderProductTitle(e.target.value)}
+                    placeholder="Например: Iphone17 или iPhone 17"
+                    maxLength={120}
+                    required
+                  />
+                  <button type="submit" className="btn">
+                    Отслеживать
+                  </button>
+                </form>
+
+                {realtimeEvents.length > 0 ? (
+                  <ul className="realtimeEvents">
+                    {realtimeEvents.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {trackedReminders.length > 0 ? (
+                  <ul className="realtimeEvents">
+                    {trackedReminders.map((item) => (
+                      <li key={item.id}>
+                        Отслеживается: {item.productTitle}{" "}
+                        <button
+                          type="button"
+                          className="btn btn--sm"
+                          onClick={() => handleDismissTrackedReminder(item.id)}
+                        >
+                          Удалить
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </section>
+
+              {browserReminder ? (
+                <section className="reminderPanel">
+                  <div className="reminderPanel__header">
+                    <h2>Товар найден</h2>
+                    <button
+                      type="button"
+                      className="btn btn--primary"
+                      onClick={handleDismissBrowserReminder}
+                    >
+                      ОК
+                    </button>
+                  </div>
+                  <p>
+                    В каталоге появился товар:{" "}
+                    <strong>{browserReminder.productTitle}</strong>
+                  </p>
+                </section>
+              ) : null}
 
               {loading ? (
                 <div className="empty">Загрузка каталога...</div>
