@@ -9,8 +9,29 @@ const {
 } = require("../helpers/product");
 const { generateId } = require("../helpers/user");
 const { VIEWER_ROLES, SELLER_ROLES, ROLES } = require("../config/constants");
+const { matchRemindersForProduct } = require("../services/reminders.service");
+const { getIo, isUserCurrentlyVisible } = require("../socket");
+const { sendPushToUser } = require("../services/push.service");
 
 const router = Router();
+
+function triggerReminders(product) {
+  const matched = matchRemindersForProduct(product);
+  const io = getIo();
+
+  for (const match of matched) {
+    io.emit("availabilityAlertTriggered", match);
+
+    if (!isUserCurrentlyVisible(match.userId)) {
+      const payload = JSON.stringify({
+        title: "Товар появился в каталоге",
+        body: product.title,
+        reminderId: match.reminderId,
+      });
+      sendPushToUser(match.userId, payload);
+    }
+  }
+}
 
 router.get(
   "/",
@@ -20,7 +41,7 @@ router.get(
     try {
       const cached = await redisClient.get("products:all");
       if (cached) {
-        res.set("X-Cache", "HIT"); // ← кэш
+        res.set("X-Cache", "HIT");
         return res.json(JSON.parse(cached));
       }
       const products = await Product.find().sort({ title: 1 });
@@ -53,11 +74,7 @@ router.get(
       const product = await Product.findById(req.params.id);
       if (!product) return res.status(404).json({ error: "Товар не найден" });
       const result = toPublicProduct(product);
-      await redisClient.setEx(
-        cacheKey,
-        PRODUCTS_CACHE_TTL,
-        JSON.stringify(result),
-      );
+      await redisClient.setEx(cacheKey, PRODUCTS_CACHE_TTL, JSON.stringify(result));
       res.set("X-Cache", "MISS");
       res.json(result);
     } catch (err) {
@@ -75,6 +92,7 @@ router.post(
       const { title, category, description, price } = req.body;
       const error = validateProductPayload({ title, category, price });
       if (error) return res.status(400).json({ error });
+
       const product = new Product({
         _id: generateId("p"),
         title: String(title).trim(),
@@ -82,9 +100,14 @@ router.post(
         description: String(description || "").trim(),
         price: Number(price),
       });
+
       await product.save();
       await redisClient.del("products:all");
-      res.status(201).json(toPublicProduct(product));
+
+      const publicProduct = toPublicProduct(product);
+      triggerReminders(publicProduct); // ← проверяем напоминания
+
+      res.status(201).json(publicProduct);
     } catch (err) {
       res.status(500).json({ error: "Ошибка создания товара" });
     }
@@ -99,19 +122,23 @@ router.put(
     try {
       const product = await Product.findById(req.params.id);
       if (!product) return res.status(404).json({ error: "Товар не найден" });
+
       const error = validateProductPayload(req.body, { partial: true });
       if (error) return res.status(400).json({ error });
-      if (req.body.title !== undefined)
-        product.title = String(req.body.title).trim();
-      if (req.body.category !== undefined)
-        product.category = String(req.body.category).trim();
-      if (req.body.description !== undefined)
-        product.description = String(req.body.description).trim();
+
+      if (req.body.title !== undefined) product.title = String(req.body.title).trim();
+      if (req.body.category !== undefined) product.category = String(req.body.category).trim();
+      if (req.body.description !== undefined) product.description = String(req.body.description).trim();
       if (req.body.price !== undefined) product.price = Number(req.body.price);
+
       await product.save();
       await redisClient.del("products:all");
       await redisClient.del(`products:${req.params.id}`);
-      res.json(toPublicProduct(product));
+
+      const publicProduct = toPublicProduct(product);
+      triggerReminders(publicProduct); // ← проверяем напоминания
+
+      res.json(publicProduct);
     } catch (err) {
       res.status(500).json({ error: "Ошибка обновления товара" });
     }
