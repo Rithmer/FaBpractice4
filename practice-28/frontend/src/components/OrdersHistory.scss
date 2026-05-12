@@ -1,0 +1,98 @@
+$bg: #0a0e17;
+$panel: rgba(255,255,255,0.05);
+$border: rgba(255,255,255,0.15);
+$text: #e6e9f0;
+$text-muted: rgba(230,233,240,0.6);
+$success: rgba(34,197,94,0.7);
+$success-bg: rgba(34,197,94,0.12);
+
+.orders-status {
+  color: $text-muted;
+  padding: 32px 0;
+  text-align: center;
+}
+
+.orders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: $text;
+    margin-bottom: 4px;
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.order-card {
+  background: $panel;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__id {
+    font-size: 14px;
+    color: $text;
+    font-weight: 600;
+  }
+
+  &__date {
+    font-size: 13px;
+    color: $text-muted;
+    margin-left: auto;
+  }
+
+  &__status {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+
+    &--paid {
+      background: $success-bg;
+      color: $success;
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+  }
+
+  &__items {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: $text-muted;
+  }
+
+  &__total {
+    font-size: 14px;
+    color: $text;
+    border-top: 1px solid $border;
+    padding-top: 10px;
+    strong { color: #38bdf8; }
+  }
+}

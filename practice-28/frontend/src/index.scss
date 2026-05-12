@@ -1,0 +1,93 @@
+@mixin box-sizing($type: border-box) {
+  box-sizing: $type;
+  &::before,
+  &::after {
+    box-sizing: $type;
+  }
+}
+
+@mixin font-smooth($stack, $webkit: antialiased, $moz: grayscale) {
+  font-family: $stack;
+  -webkit-font-smoothing: $webkit;
+  -moz-osx-font-smoothing: $moz;
+}
+
+$font-stack:
+  -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+  "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+
+$bg: #0a0e17;
+$panel: rgba(255, 255, 255, 0.05);
+$border: rgba(255, 255, 255, 0.15);
+$text: #e6e9f0;
+$primary: #38bdf8;
+$danger: #ef4444;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: $bg;
+  color: $text;
+  @include font-smooth($font-stack);
+  @include box-sizing();
+  line-height: 1.5;
+}
+
+a {
+  color: $primary;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid $border;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &--primary {
+    background: $primary;
+    border-color: $primary;
+    color: #000;
+    font-weight: 600;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  &--danger {
+    border-color: $danger;
+    color: $danger;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.12);
+    }
+  }
+
+  &--sm {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+.loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  opacity: 0.5;
+}
